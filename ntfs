@@ -1,0 +1,36 @@
+#!/bin/bash
+if [[ "$1" = "on" ]]; then
+    if [[ ! -f "/sbin/mount_ntfs.orig" ]]; then
+        sudo cp /sbin/mount_ntfs /sbin/mount_ntfs.orig
+    fi
+    sudo rm /sbin/mount_ntfs
+    sudo ln -s /usr/local/sbin/mount_ntfs /sbin/mount_ntfs
+    echo "Switched to Write mode(ntfs-3g)."
+elif [[ "$1" = "off" ]]; then
+    if [[ ! -f "/sbin/mount_ntfs.orig" ]]; then
+        echo "Mode not switched."
+    else
+        sudo rm /sbin/mount_ntfs
+        sudo cp /sbin/mount_ntfs.orig /sbin/mount_ntfs
+        echo "Switched to Read mode(original)."
+    fi
+elif [[ "$1" = "status" ]]; then
+    file1=/sbin/mount_ntfs
+    file2=/sbin/mount_ntfs.orig
+    if [[ ! -f "$file2" ]]; then
+        echo "Mode: Off"
+    else
+        diff $file1 $file2 > /dev/null
+        if [[ $? != 0 ]]; then
+            echo "Mode: On"
+        else 
+            echo "Mode: Off"
+        fi
+    fi
+else
+    echo "Usage: ntfs [OPTIONS]\n"
+    echo "Example usage:"
+    echo "  ntfs on\tMount NTFS with ntfs-3g to write-and-read"
+    echo "  ntfs off\tMount NTFS with original macOS mount_ntfs"
+    echo "  ntfs status\tShow status"
+fi
